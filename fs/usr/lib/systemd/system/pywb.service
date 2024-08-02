@@ -1,0 +1,9 @@
+[Unit]
+Description=Python WayBack (pywb)
+
+[Service]
+User=ec2-user
+ExecStart=/opt/pywb/venv/bin/pywb
+
+[Install]
+WantedBy=multi-user.target

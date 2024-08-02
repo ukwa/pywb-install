@@ -1,0 +1,69 @@
+#!/bin/sh
+set -e
+
+# source common bashlib or exit
+if [[ -f ${UKWACOMMONDIR}/common.sh ]]; then source ${UKWACOMMONDIR}/common.sh; else echo "ERROR: ${UKWACOMMONDIR}/common.sh missing"; exit 1; fi
+
+NOPREFIX=1
+DEBUG=
+
+SERVICE=pywb
+USER=$(id --user --name)
+GROUP=$(id --group --name)
+BASEDIR=/opt
+PYWBDIR=${BASEDIR}/${SERVICE}
+PYWBCFGDIR=/etc/${SERVICE}
+
+
+# functions ----------
+function install_nginx {
+	log DEBUG "install_nginx"
+	if ! [[ $(which nginx 2> /dev/null) ]]; then
+		log INFO "Installing nginx"
+		sudo dnf install -y nginx
+		sudo usermod -aG nginx ${USER}
+	else
+		log WARNING "nginx already installed"
+	fi
+	sudo chown -R nginx:nginx /var/log/nginx/
+	sudo chmod g+r /var/log/nginx/
+	if ! [[ -d /etc/nginx/_original/ ]]; then
+		log INFO "Removing nginx defaults"
+		sudo mkdir /etc/nginx/_original
+		sudo mv /etc/nginx/* /etc/nginx/_original/ 2> /dev/null
+	fi
+}
+
+function install_pywb {
+	log DEBUG "install_pywb"
+	if ! [[ -d ${PYWBDIR}/ ]]; then
+		log INFO "Making ${PYWBDIR} directory"
+		sudo mkdir ${PYWBDIR}
+
+		log INFO "Create venv"
+		cd ${PYWBDIR}
+		python -m venv venv
+		source venv/bin/activate
+
+		log INFO "Upgrading pip"
+		python -m pip install --upgrade pip
+
+		log INFO "Installing pyuwb"
+		python -m pip install pywb
+	fi
+	sudo chown ${USER}:${GROUP} ${PYWBDIR}
+}
+
+function set_selinux {
+	log DEBUG "set_selinux"
+	sudo setsebool -P httpd_can_network_connect=on
+}
+
+# script -------------
+ensure_not_root
+install_nginx
+install_pywb
+set_selinux
+copy_directory fs
+
+log_stop
