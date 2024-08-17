@@ -39,6 +39,7 @@ function install_pywb {
 	if ! [[ -d ${PYWBDIR}/ ]]; then
 		log INFO "Making ${PYWBDIR} directory"
 		sudo mkdir ${PYWBDIR}
+		sudo chown ${USER}:${GROUP} ${PYWBDIR}
 
 		log INFO "Create venv"
 		cd ${PYWBDIR}
@@ -51,7 +52,8 @@ function install_pywb {
 		log INFO "Installing pyuwb"
 		python -m pip install pywb
 	fi
-	sudo chown ${USER}:${GROUP} ${PYWBDIR}
+	[[ -d ${PYWBCFGDIR}/ ]] || sudo mkdir ${PYWBCFGDIR}
+	sudo chown ${USER}:${GROUP} ${PYWBDIR} ${PYWBCFGDIR}
 }
 
 function set_selinux {

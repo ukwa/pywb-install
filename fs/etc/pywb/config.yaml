@@ -3,4 +3,4 @@ debug: true
 collections:
   archive:
     index_paths: "cdx+http://localhost:8081/fc?url={url}&closest={closest}&sort=closest&filter=!statuscode:429&filter=!mimetype:warc/revisit"
-    archive_paths: /mnt/s3/ukwa-fc2023-s3-1/heritrix/output/frequent-npld/20240523082409/warcs/
+    archive_paths: http://localhost:8070/
