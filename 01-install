@@ -16,24 +16,6 @@ PYWBCFGDIR=/etc/${SERVICE}
 
 
 # functions ----------
-function install_nginx {
-	log DEBUG "install_nginx"
-	if ! [[ $(which nginx 2> /dev/null) ]]; then
-		log INFO "Installing nginx"
-		sudo dnf install -y nginx
-		sudo usermod -aG nginx ${USER}
-	else
-		log WARNING "nginx already installed"
-	fi
-	sudo chown -R nginx:nginx /var/log/nginx/
-	sudo chmod g+r /var/log/nginx/
-	if ! [[ -d /etc/nginx/_original/ ]]; then
-		log INFO "Removing nginx defaults"
-		sudo mkdir /etc/nginx/_original
-		sudo mv /etc/nginx/* /etc/nginx/_original/ 2> /dev/null
-	fi
-}
-
 function install_pywb {
 	log DEBUG "install_pywb"
 	if ! [[ -d ${PYWBDIR}/ ]]; then
@@ -63,7 +45,6 @@ function set_selinux {
 
 # script -------------
 ensure_not_root
-install_nginx
 install_pywb
 set_selinux
 copy_directory fs
